@@ -20,9 +20,9 @@ Adafruit_NeoPixel pixel = Adafruit_NeoPixel(1, NEO_PIN, NEO_GRB + NEO_KHZ800);
 DHTNEW dhtSensor(DHT_PIN);
 
 pms5003data newSensorData = pms5003data();
-uint8_t humidity;
-uint8_t temperature;
-CircularBuffer cbuffer;
+CircularBuffer aqiBuffer;
+CircularBuffer tempBuffer;
+CircularBuffer humidityBuffer;
 
 void setup() {
     Serial.begin(115200);
@@ -71,7 +71,7 @@ void setup() {
 }
 
 void displayData(bool refreshSign) {
-    uint16_t averagAQI = cbuffer.getAverage();
+    uint16_t averageAQI = aqiBuffer.getAverage();
     u8g2.firstPage();
     do {
         //top line
@@ -97,17 +97,17 @@ void displayData(bool refreshSign) {
         //temp and humidity
         u8g2.setFont(u8g2_font_logisoso16_tf);
         u8g2.setCursor(98, 38);
-        u8g2.print(temperature);
+        u8g2.print(tempBuffer.getAverage());
         u8g2.print(F("°"));
         u8g2.setCursor(98, 63);
-        u8g2.print(humidity);
+        u8g2.print(humidityBuffer.getAverage());
         u8g2.print(F("%"));
 
         //--AQI
         u8g2.setFont(u8g2_font_logisoso46_tn);
-        int width = u8g2.getUTF8Width(String(averagAQI).c_str());
+        int width = u8g2.getUTF8Width(String(averageAQI).c_str());
         u8g2.setCursor(45-width/2,63);
-        u8g2.print(averagAQI);
+        u8g2.print(averageAQI);
         u8g2.setFont(u8g2_font_6x12_mr);
         u8g2.setCursor(0,63);
         u8g2.print("AQI");
@@ -117,19 +117,19 @@ void displayData(bool refreshSign) {
 
 boolean readPMSData(Stream *s, pms5003data *data) {
     if (!s->available()) {
-        Serial.println(F("Stream not available"));
+       // Serial.println(F("Stream not available"));
         return false;
     }
 
     // Read a byte at a time until we get to the special '0x42' start-byte
     while (s->peek() != 0x42) {
         s->read();
-        Serial.println(F("byte is not 0x42"));
+       // Serial.println(F("byte is not 0x42"));
     }
 
     // Now read all 32 bytes
     if (s->available() < 32) {
-        Serial.println(F("less than 32 bytes available"));
+       // Serial.println(F("less than 32 bytes available"));
         return false;
     }
 
@@ -137,24 +137,25 @@ boolean readPMSData(Stream *s, pms5003data *data) {
     uint16_t sum = 0;
     s->readBytes(buffer, 32);
 
-    Serial.println(F("Read all 32 bytes to buffer"));
+    //Serial.println(F("Read all 32 bytes to buffer"));
 
     // get checksum ready
     for (uint8_t i = 0; i < 30; i++) {
         sum += buffer[i];
     }
 
+/*
+// debugging
     Serial.print(F("Checksum is "));
     Serial.println(sum, HEX);
 
-    /* debugging */
+
     for (uint8_t i = 2; i < 32; i++) {
         Serial.print(F("0x"));
         Serial.print(buffer[i], HEX);
         Serial.print(F(", "));
     }
-    Serial.println(F("---"));
-
+*/
 
     // The data comes in endian'd, this solves it so it works on all platforms
     uint16_t buffer_u16[15];
@@ -173,7 +174,7 @@ boolean readPMSData(Stream *s, pms5003data *data) {
         Serial.println(data->checksum, HEX);
         return false;
     } else {
-        Serial.println(F("All good"));
+        //Serial.println(F("All good"));
     }
     // success!
     return true;
@@ -183,19 +184,13 @@ void loop() {
     displayData(true);
 
     dhtSensor.read();
-    humidity = round(dhtSensor.getHumidity());
-    temperature = round(dhtSensor.getTemperature());
-    Serial.print(F("Humidity "));
-    Serial.print(humidity, 1);
-    Serial.print(F("\t"));
-    Serial.print(F("Temperature "));
-    Serial.println(temperature, 1);
+    humidityBuffer.add(round(dhtSensor.getHumidity()));
+    tempBuffer.add(round(dhtSensor.getTemperature()));
 
     if (readPMSData(&pmsSerial, &newSensorData)) {
-        uint16_t currentAqi = AQICalculator::getAqi(newSensorData.pm25_standard, newSensorData.pm100_standard, humidity);
-        Serial.print(F("AQI:"));
+        uint16_t currentAqi = AQICalculator::getAqi(newSensorData.pm25_standard, newSensorData.pm100_standard, humidityBuffer.getAverage());
         Serial.println(currentAqi);
-        cbuffer.add(currentAqi);
+        aqiBuffer.add(currentAqi);
 
         displayData(false);
 
@@ -207,7 +202,6 @@ void loop() {
 
 
         delay(4000);
-
     } else {
         Serial.println(F("Failure"));
         delay(1000);  // try again in a bit!

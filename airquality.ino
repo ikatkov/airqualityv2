@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "SoftwareSerial.h"
-#include "dhtnew.h"
+#include "DHT.h"
 #include "Adafruit_NeoPixel.h"
 #include "AQICalculator.h"
 #include "aqicolors.h"
@@ -13,11 +13,12 @@
 #define DHT_PIN 13
 #define PMS5003_RX_PIN 2
 #define PMS5003_TX_PIN 3 //not used
+#define DHTTYPE DHT22
 
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 SoftwareSerial pmsSerial(PMS5003_RX_PIN, PMS5003_TX_PIN);
 Adafruit_NeoPixel pixel = Adafruit_NeoPixel(1, NEO_PIN, NEO_GRB + NEO_KHZ800);
-DHTNEW dhtSensor(DHT_PIN);
+DHT dht(DHT_PIN, DHTTYPE);
 
 pms5003data newSensorData = pms5003data();
 CircularBuffer* aqiBuffer = new CircularBuffer;
@@ -28,10 +29,8 @@ void setup() {
     Serial.begin(115200);
     while (!Serial) delay(10);
 
-    //empirical corrections
-    dhtSensor.setTempOffset(-1.5);
-    dhtSensor.setHumOffset(+2);
-
+    //DHT initialization
+    dht.begin();
     // PMS5003 sensor baud rate is 9600
     pmsSerial.begin(9600);
     Serial.println(F("PMS5003 Air Quality Sensor"));
@@ -185,9 +184,12 @@ boolean readPMSData(Stream *s, pms5003data *data) {
 void loop() {
     displayData(true);
 
-    dhtSensor.read();
-    float humidity = dhtSensor.getHumidity();
-    float temperature = dhtSensor.getHumidity();
+    float humidity = dht.readHumidity();
+    float temperature = dht.readTemperature();
+
+    //empirical corrections
+    temperature -=1.5;
+    humidity +=2;
     if(humidity > 0 && humidity <= 100)
       humidityBuffer->add(humidity);
     if(temperature >= -40 && temperature <= 80)

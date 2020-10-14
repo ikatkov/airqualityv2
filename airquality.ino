@@ -28,13 +28,15 @@ void setup() {
     Serial.begin(115200);
     while (!Serial) delay(10);
 
+    //empirical corrections
+    dhtSensor.setTempOffset(-1.5);
+    dhtSensor.setHumOffset(+2);
+
     // PMS5003 sensor baud rate is 9600
     pmsSerial.begin(9600);
-    Serial.println(F("PMSA003 Air Quality Sensor"));
+    Serial.println(F("PMS5003 Air Quality Sensor"));
 
     u8g2.begin();
-    u8g2.enableUTF8Print();
-
 
     // Draw logos
     u8g2.begin();
@@ -44,14 +46,14 @@ void setup() {
         u8g2.drawXBMP(0, 0, 128, 64, logo_temp);
     } while (u8g2.nextPage());
 
-    delay(100);
+    delay(200);
 
     u8g2.firstPage();
     do {
         u8g2.drawXBMP(0, 0, 128, 64, logo_humidity);
     } while (u8g2.nextPage());
 
-    delay(100);
+    delay(200);
 
     u8g2.firstPage();
     do {
@@ -72,6 +74,7 @@ void displayData(bool refreshSign) {
     uint16_t averagAQI = cbuffer.getAverage();
     u8g2.firstPage();
     do {
+        //top line
         u8g2.setFont(u8g2_font_6x12_mr);
         u8g2.setCursor(0, 10);
         u8g2.print(F("PM    "));
@@ -85,22 +88,29 @@ void displayData(bool refreshSign) {
         u8g2.setCursor(77, 12);
         u8g2.print(F("10.0"));
 
+        //refreshSign
         if(refreshSign) {
             u8g2.setFont(u8g2_font_open_iconic_arrow_1x_t);
             u8g2.drawGlyph(120, 16, 87);
         }
 
+        //temp and humidity
         u8g2.setFont(u8g2_font_logisoso16_tf);
-        u8g2.setCursor(98, 40);
+        u8g2.setCursor(98, 38);
         u8g2.print(temperature);
         u8g2.print(F("°"));
-        u8g2.setCursor(98, 60);
+        u8g2.setCursor(98, 63);
         u8g2.print(humidity);
         u8g2.print(F("%"));
 
+        //--AQI
         u8g2.setFont(u8g2_font_logisoso46_tn);
-        u8g2.setCursor(0,63);
+        int width = u8g2.getUTF8Width(String(averagAQI).c_str());
+        u8g2.setCursor(45-width/2,63);
         u8g2.print(averagAQI);
+        u8g2.setFont(u8g2_font_6x12_mr);
+        u8g2.setCursor(0,63);
+        u8g2.print("AQI");
     } while ( u8g2.nextPage());
 }
 
@@ -197,10 +207,12 @@ void loop() {
 
 
         delay(4000);
+
     } else {
         Serial.println(F("Failure"));
         delay(1000);  // try again in a bit!
     }
+
 }
 
 

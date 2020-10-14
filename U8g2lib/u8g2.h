@@ -106,7 +106,7 @@
   Setting a clip window will restrict all drawing to this window.
   Clip window support requires about 200 bytes flash memory on AVR systems
 */
-#define U8G2_WITH_CLIP_WINDOW_SUPPORT
+//#define U8G2_WITH_CLIP_WINDOW_SUPPORT
 
 /*
   The following macro enables all four drawing directions for glyphs and strings.
@@ -114,7 +114,7 @@
   
   Jan 2020: Disabling this macro will save up to 600 bytes on AVR 
 */
-#define U8G2_WITH_FONT_ROTATION
+//#define U8G2_WITH_FONT_ROTATION
 
 /*
   U8glib V2 contains support for unicode plane 0 (Basic Multilingual Plane, BMP).
@@ -140,7 +140,7 @@
       - C-Code Strings are assumbed to be ISO 8859-1/CP1252 encoded
       - Only character values 0 to 255 are supported in the font file.
 */
-#define U8G2_WITH_UNICODE
+//#define U8G2_WITH_UNICODE
 
 
 

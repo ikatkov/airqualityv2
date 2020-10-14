@@ -3,7 +3,7 @@
 
 CircularBuffer:: CircularBuffer() = default;
 
-void CircularBuffer::add(uint16_t value) {
+void CircularBuffer::add(float value) {
     _buffer[_position] = value;
     _position = (_position + 1) % MAX_LENGTH;
     _length++;
@@ -11,11 +11,12 @@ void CircularBuffer::add(uint16_t value) {
         _length = MAX_LENGTH;
 }
 
-uint16_t CircularBuffer::getAverage() {
-    uint16_t sum = 0;
+float CircularBuffer::getAverage() {
+    if(_length == 0) return 0;
+    float sum = 0;
     for (int i = 0; i < _length; i++) {
         Serial.println(_buffer[i]);
         sum += _buffer[i];
     }
-    return lround(1.0*sum/_length);
+    return sum/_length;
 }

@@ -5,11 +5,13 @@ set(PROJECT_NAME airquality)
 project(${PROJECT_NAME})
 
 # set board type accordingly, for optiboot 328p 16Mhz set to uno
-set(${PROJECT_NAME}_BOARD uno)
+#set(${PROJECT_NAME}_BOARD uno)
 
-#for pro mini set to "pro" and set CPU
-#set(${PROJECT_NAME}_BOARD pro)
-#set(ARDUINO_CPU 16MHzatmega328)
+#for pro mini 16MHz 5V
+#set(${PROJECT_NAME}_BOARD mypro16)
+
+#for pro mini 8MHz 3V3
+set(${PROJECT_NAME}_BOARD mypro8)
 
 print_board_list()
 

@@ -71,7 +71,9 @@ void setup() {
 }
 
 void displayData(bool refreshSign) {
-    uint16_t averageAQI = aqiBuffer->getAverage();
+    uint16_t averageAQI = round(aqiBuffer->getAverage());
+    uint16_t averageTemp = round(tempBuffer->getAverage());
+    uint16_t averageHumidity = round(humidityBuffer->getAverage());
     u8g2.firstPage();
     do {
         //top line
@@ -97,10 +99,10 @@ void displayData(bool refreshSign) {
         //temp and humidity
         u8g2.setFont(u8g2_font_logisoso16_tf);
         u8g2.setCursor(98, 38);
-        u8g2.print(tempBuffer->getAverage());
+        u8g2.print(averageTemp);
         u8g2.print(F("°"));
         u8g2.setCursor(98, 63);
-        u8g2.print(humidityBuffer->getAverage());
+        u8g2.print(averageHumidity);
         u8g2.print(F("%"));
 
         //--AQI
@@ -184,13 +186,19 @@ void loop() {
     displayData(true);
 
     dhtSensor.read();
-    humidityBuffer->add(round(dhtSensor.getHumidity()));
-    tempBuffer->add(round(dhtSensor.getTemperature()));
+    float humidity = dhtSensor.getHumidity();
+    float temperature = dhtSensor.getHumidity();
+    if(humidity > 0 && humidity <= 100)
+      humidityBuffer->add(humidity);
+    if(temperature >= -40 && temperature <= 80)
+     tempBuffer->add(temperature);
 
     Serial.print(F("Humidity "));
+    Serial.print(humidity);
     Serial.print(humidityBuffer->getAverage(), 1);
     Serial.print(F("\t"));
     Serial.print(F("Temperature "));
+    Serial.print(temperature);
     Serial.println(tempBuffer->getAverage(), 1);
 
     if (readPMSData(&pmsSerial, &newSensorData)) {

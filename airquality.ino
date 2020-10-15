@@ -9,10 +9,10 @@
 #include <avr/pgmspace.h>
 #include "CircularBuffer.h"
 
-#define NEO_PIN 10
-#define DHT_PIN 13
+#define NEO_PIN 3
+#define DHT_PIN 4
 #define PMS5003_RX_PIN 2
-#define PMS5003_TX_PIN 3 //not used
+#define PMS5003_TX_PIN 10 //not used
 #define DHTTYPE DHT22
 
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
@@ -21,9 +21,9 @@ Adafruit_NeoPixel pixel = Adafruit_NeoPixel(1, NEO_PIN, NEO_GRB + NEO_KHZ800);
 DHT dht(DHT_PIN, DHTTYPE);
 
 pms5003data newSensorData = pms5003data();
-CircularBuffer* aqiBuffer = new CircularBuffer;
-CircularBuffer* tempBuffer = new CircularBuffer;
-CircularBuffer* humidityBuffer = new CircularBuffer;
+CircularBuffer aqiBuffer;
+CircularBuffer tempBuffer;
+CircularBuffer humidityBuffer;
 
 void setup() {
     Serial.begin(115200);
@@ -70,9 +70,9 @@ void setup() {
 }
 
 void displayData(bool refreshSign) {
-    uint16_t averageAQI = round(aqiBuffer->getAverage());
-    uint16_t averageTemp = round(tempBuffer->getAverage());
-    uint16_t averageHumidity = round(humidityBuffer->getAverage());
+    uint16_t averageAQI = round(aqiBuffer.getAverage());
+    uint16_t averageTemp = round(tempBuffer.getAverage());
+    uint16_t averageHumidity = round(humidityBuffer.getAverage());
     u8g2.firstPage();
     do {
         //top line
@@ -172,7 +172,7 @@ boolean readPMSData(Stream *s, pms5003data *data) {
 /*        Serial.print(F("Checksum failure: "));
         Serial.print(sum, HEX);
         Serial.print(F("!="));
-        Serial.println(data->checksum, HEX);*/
+        Serial.println(data.checksum, HEX);*/
         return false;
     } else {
         //Serial.println(F("All good"));
@@ -188,25 +188,25 @@ void loop() {
     float temperature = dht.readTemperature();
 
     //empirical corrections
-    temperature -=1.5;
-    humidity +=2;
+//    temperature -=1.5;
+//    humidity +=2;
     if(humidity > 0 && humidity <= 100)
-      humidityBuffer->add(humidity);
+      humidityBuffer.add(humidity);
     if(temperature >= -40 && temperature <= 80)
-     tempBuffer->add(temperature);
+     tempBuffer.add(temperature);
 
     Serial.print(F("Humidity "));
     Serial.print(humidity);
-    Serial.print(humidityBuffer->getAverage(), 1);
+    Serial.print(humidityBuffer.getAverage(), 1);
     Serial.print(F("\t"));
     Serial.print(F("Temperature "));
     Serial.print(temperature);
-    Serial.println(tempBuffer->getAverage(), 1);
+    Serial.println(tempBuffer.getAverage(), 1);
 
     if (readPMSData(&pmsSerial, &newSensorData)) {
-        uint16_t currentAqi = AQICalculator::getAqi(newSensorData.pm25_standard, newSensorData.pm100_standard, humidityBuffer->getAverage());
+        uint16_t currentAqi = AQICalculator::getAqi(newSensorData.pm25_standard, newSensorData.pm100_standard, humidityBuffer.getAverage());
         Serial.println(currentAqi);
-        aqiBuffer->add(currentAqi);
+        aqiBuffer.add(currentAqi);
 
         displayData(false);
 

@@ -1,6 +1,9 @@
 #pragma once
 #include "Arduino.h"
 
+//byte[500][3] array. Each element represents a AQI color from green - 0 to brown 500+
+//Color transition computations are surprisingly complex
+// see https://github.com/ikatkov/static_aiq_colors_calc
 static const uint8_t aiq_colors[] PROGMEM =  {
 0x00, 0x64, 0x00,
 0x00, 0x64, 0x00,

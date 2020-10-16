@@ -1,10 +1,12 @@
 #Air quality sensor
 
-<img src="./sensor.png"> 
+<img src="./sensor.jpg"> 
 
 #Documentation
-PMS5003 pin-out and protocol - 
-https://www.aqmd.gov/docs/default-source/aq-spec/resources-page/plantower-pms5003-manual_v2-3.pdf 
+
+[PMS5003 particulate sensor pin-out and protocol]( 
+https://www.aqmd.gov/docs/default-source/aq-spec/resources-page/plantower-pms5003-manual_v2-3.pdf)
+[Temperature and humidity sensor](https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf)
 
 #AQI equation
 <img src="./aqi-equation.png"> 

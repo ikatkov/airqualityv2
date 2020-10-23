@@ -18,6 +18,17 @@ print_board_list()
 ### Main sketch file
 set(${PROJECT_NAME}_SKETCH airquality.ino)
 
+
+file(GLOB SRC_TOP ${PROJECT_SOURCE_DIR}/*.cpp)
+file(GLOB HDR_TOP ${PROJECT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE SRC_FILES ${PROJECT_SOURCE_DIR}/*.cpp  )
+file(GLOB_RECURSE HDR_FILES ${PROJECT_SOURCE_DIR}/*.h )
+
+set(${PROJECT_NAME}_SRCS ${SRC_TOP} ${SRC_FILES})
+set(${PROJECT_NAME}_HDRS ${HDR_TOP} ${HDR_FILES})
+
+
+
 set(${PROJECT_NAME}_PROGRAMMER avrispmkii)
 set(${PROJECT_NAME}_PORT /dev/cu.usbserial-A4010ILD)
 

@@ -15,8 +15,7 @@ float CircularBuffer::getAverage() {
     if(_length == 0) return 0;
     float sum = 0;
     for (int i = 0; i < _length; i++) {
-        Serial.println(_buffer[i]);
         sum += _buffer[i];
     }
-    return sum/_length;
+    return sum/(float)_length;
 }

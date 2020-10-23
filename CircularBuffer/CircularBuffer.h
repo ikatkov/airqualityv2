@@ -11,7 +11,7 @@ public:
     float getAverage();
 
 private:
-    float _buffer[MAX_LENGTH];
+    float _buffer[MAX_LENGTH] = {};
     uint8_t _position = 0;
     uint8_t _length = 0;
 };

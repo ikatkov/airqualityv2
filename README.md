@@ -1,5 +1,6 @@
 # Air quality sensor
 
+<img src="./side.jpg"> 
 <img src="./sensor.jpg"> 
 
 # Documentation

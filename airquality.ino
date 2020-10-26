@@ -188,8 +188,8 @@ void loop() {
     float temperature = dht.readTemperature();
 
     //empirical corrections
-//    temperature -=1.5;
-//    humidity +=2;
+    temperature -=1.5;
+    humidity +=2;
     if(humidity > 0 && humidity <= 100)
       humidityBuffer.add(humidity);
     if(temperature >= -40 && temperature <= 80)

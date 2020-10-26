@@ -1,7 +1,7 @@
 # Air quality sensor
 
-<img src="./side.jpg"> 
-<img src="./sensor.jpg"> 
+<img src="./side.jpg" width="300"> 
+<img src="./sensor.jpg" width="300"> 
 
 # Documentation
 

@@ -4,6 +4,7 @@
 <img src="./front.jpg" width="300"> 
 <img src="./back.jpg" width="300"> 
 <img src="./sensor.jpg" width="300"> 
+<img src="./case.jpg" width="300"> 
 
 # Documentation
 

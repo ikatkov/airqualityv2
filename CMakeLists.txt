@@ -5,6 +5,7 @@ set(PROJECT_NAME airquality)
 project(${PROJECT_NAME})
 
 # set board type accordingly, for optiboot 328p 16Mhz set to uno
+#notice that PM5003 sensor needs 3.3V logic!
 #set(${PROJECT_NAME}_BOARD uno)
 
 #for pro mini 16MHz 5V
@@ -12,11 +13,13 @@ project(${PROJECT_NAME})
 
 #for pro mini 8MHz 3V3
 set(${PROJECT_NAME}_BOARD mypro8)
+set(mypro8.upload.maximum_size "30720")
+set(mypro8.build.mcu  "atmega328p")
 
 print_board_list()
 
 ### Main sketch file
-set(${PROJECT_NAME}_SKETCH airquality.ino)
+set(${PROJECT_NAME}_SKETCH airqualityv2.ino)
 
 
 file(GLOB SRC_TOP ${PROJECT_SOURCE_DIR}/*.cpp)
@@ -37,4 +40,4 @@ set(${PROJECT_NAME}_AFLAGS -v)
 
 generate_arduino_firmware(${PROJECT_NAME})
 
-print_programmer_list()
+##print_programmer_list()

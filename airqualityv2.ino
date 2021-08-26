@@ -1,24 +1,27 @@
 #include <Arduino.h>
 #include "SoftwareSerial.h"
-#include "DHT.h"
 #include "Adafruit_NeoPixel.h"
 #include "AQICalculator.h"
 #include "aqicolors.h"
 #include "U8g2lib.h"
-#include "logo.h"
+#include "Adafruit_BME280.h"
+#include "MQ135.h"
+//#include "logo.h"
 #include <avr/pgmspace.h>
 #include "CircularBuffer.h"
 
 #define NEO_PIN 3
-#define DHT_PIN 4
+#define GAS_SENSOR_PIN A0
 #define PMS5003_RX_PIN 2
 #define PMS5003_TX_PIN 10 //not used
-#define DHTTYPE DHT22
 
 U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 SoftwareSerial pmsSerial(PMS5003_RX_PIN, PMS5003_TX_PIN);
 Adafruit_NeoPixel pixel = Adafruit_NeoPixel(1, NEO_PIN, NEO_GRB + NEO_KHZ800);
-DHT dht(DHT_PIN, DHTTYPE);
+
+
+Adafruit_BME280 bme; // I2C
+MQ135 gasSensor = MQ135(A0);
 
 pms5003data newSensorData = pms5003data();
 CircularBuffer aqiBuffer;
@@ -29,35 +32,17 @@ void setup() {
     Serial.begin(115200);
     while (!Serial) delay(10);
 
-    //DHT initialization
-    dht.begin();
+    //BME280 initialization
+    while(!bme.begin(0x76))    {
+        Serial.println("Could not find BME280 sensor!");
+        delay(1000);
+    }
+
     // PMS5003 sensor baud rate is 9600
     pmsSerial.begin(9600);
     Serial.println(F("PMS5003 Air Quality Sensor"));
 
     u8g2.begin();
-
-    // Draw logos
-    u8g2.begin();
-    u8g2.enableUTF8Print();
-    u8g2.firstPage();
-    do {
-        u8g2.drawXBMP(0, 0, 128, 64, logo_temp);
-    } while (u8g2.nextPage());
-
-    delay(200);
-
-    u8g2.firstPage();
-    do {
-        u8g2.drawXBMP(0, 0, 128, 64, logo_humidity);
-    } while (u8g2.nextPage());
-
-    delay(200);
-
-    u8g2.firstPage();
-    do {
-        u8g2.drawXBMP(0, 0, 128, 64, logo_air);
-    } while (u8g2.nextPage());
 
     // Initializes the NeoPixel library.
     pixel.begin();
@@ -184,8 +169,13 @@ boolean readPMSData(Stream *s, pms5003data *data) {
 void loop() {
     displayData(true);
 
-    float humidity = dht.readHumidity();
-    float temperature = dht.readTemperature();
+
+    float temperature = bme.readTemperature();
+    float pressure = bme.readPressure()/100.0F;
+    float humidity = bme.readHumidity();
+
+    int gasData = analogRead(GAS_SENSOR_PIN);
+    float ppm = gasSensor.getPPM();
 
     //empirical corrections
     temperature -=1.5;
@@ -201,7 +191,11 @@ void loop() {
     Serial.print(F("\t"));
     Serial.print(F("Temperature "));
     Serial.print(temperature);
+    Serial.print(F("\t"));
+    Serial.print(F("CO2 PPM "));
+    Serial.print(ppm);
     Serial.println(tempBuffer.getAverage(), 1);
+
 
     if (readPMSData(&pmsSerial, &newSensorData)) {
         uint16_t currentAqi = AQICalculator::getAqi(newSensorData.pm25_standard, newSensorData.pm100_standard, humidityBuffer.getAverage());

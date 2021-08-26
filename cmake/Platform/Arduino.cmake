@@ -2292,11 +2292,17 @@ if(NOT ARDUINO_FOUND AND ARDUINO_SDK_PATH)
 
     message(STATUS "Arduino SDK version ${ARDUINO_SDK_VERSION}: ${ARDUINO_SDK_PATH}")
 
+
+
+    message("------------- ${ARDUINO_SIZE_SCRIPT}")
+
+
+
     setup_arduino_size_script(ARDUINO_SIZE_SCRIPT)
     set(ARDUINO_SIZE_SCRIPT ${ARDUINO_SIZE_SCRIPT} CACHE INTERNAL "Arduino Size Script")
 
-    #print_board_list()
-    #print_programmer_list()
+    print_board_list()
+    print_programmer_list()
 
     set(ARDUINO_FOUND True CACHE INTERNAL "Arduino Found")
     mark_as_advanced(

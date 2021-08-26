@@ -1,0 +1,70 @@
+//
+// !!! WARNING !!! AUTO-GENERATED FILE!
+// PLEASE DO NOT MODIFY IT AND USE "platformio.ini":
+// https://docs.platformio.org/page/projectconf/section_env_build.html#build-flags
+//
+{
+    "configurations": [
+        {
+            "name": "PlatformIO",
+            "includePath": [
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/include",
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/src",
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/U8g2lib",
+                "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/MQ135",
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/CircularBuffer",
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/Adafruit_NeoPixel",
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/Adafruit_BME280",
+                "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/Adafruit_Sensor",
+                "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/AQICalculator",
+                "/Users/ikatkov/.platformio/packages/framework-arduino-avr/cores/arduino",
+                "/Users/ikatkov/.platformio/packages/framework-arduino-avr/variants/standard",
+                "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                ""
+            ],
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true,
+                "path": [
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/include",
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/src",
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/U8g2lib",
+                    "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/MQ135",
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/CircularBuffer",
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/Adafruit_NeoPixel",
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/Adafruit_BME280",
+                    "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                    "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/Adafruit_Sensor",
+                    "/Users/ikatkov/non-work-projects/platformio/airqualityv2/lib/AQICalculator",
+                    "/Users/ikatkov/.platformio/packages/framework-arduino-avr/cores/arduino",
+                    "/Users/ikatkov/.platformio/packages/framework-arduino-avr/variants/standard",
+                    "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                    "/Users/ikatkov/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                    ""
+                ]
+            },
+            "defines": [
+                "PLATFORMIO=50101",
+                "ARDUINO_AVR_LILYPAD",
+                "F_CPU=8000000L",
+                "ARDUINO_ARCH_AVR",
+                "ARDUINO=10808",
+                "__AVR_ATmega328P__",
+                ""
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++11",
+            "compilerPath": "/Users/ikatkov/.platformio/packages/toolchain-atmelavr/bin/avr-gcc",
+            "compilerArgs": [
+                "-mmcu=atmega328p",
+                ""
+            ]
+        }
+    ],
+    "version": 4
+}

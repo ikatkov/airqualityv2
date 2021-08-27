@@ -5,7 +5,7 @@
 #include "aqicolors.h"
 #include "U8g2lib.h"
 #include "Adafruit_BME280.h"
-#include "MQ135.h"
+#include "MQ135Indian.h"
 //#include "logo.h"
 #include <avr/pgmspace.h>
 #include "CircularBuffer.h"
@@ -21,7 +21,7 @@ Adafruit_NeoPixel pixel = Adafruit_NeoPixel(1, NEO_PIN, NEO_GRB + NEO_KHZ800);
 
 
 Adafruit_BME280 bme; // I2C
-MQ135 gasSensor = MQ135(A0);
+MQ135Indian gasSensor = MQ135Indian(A0);
 
 pms5003data newSensorData = pms5003data();
 CircularBuffer aqiBuffer;
@@ -171,15 +171,13 @@ void loop() {
 
 
     float temperature = bme.readTemperature();
-    float pressure = bme.readPressure()/100.0F;
+  //  float pressure = bme.readPressure()/100.0F;
     float humidity = bme.readHumidity();
-
-    int gasData = analogRead(GAS_SENSOR_PIN);
-    float ppm = gasSensor.getPPM();
+    float ppm = gasSensor.getCorrectedPPM(temperature, humidity);
 
     //empirical corrections
-    temperature -=1.5;
-    humidity +=2;
+    //temperature -=1.5;
+    //humidity +=2;
     if(humidity > 0 && humidity <= 100)
       humidityBuffer.add(humidity);
     if(temperature >= -40 && temperature <= 80)

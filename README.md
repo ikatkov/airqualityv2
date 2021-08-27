@@ -12,7 +12,9 @@ Install PlatformIO (or CLI only) - https://docs.platformio.org/en/latest/core/in
 `brew install platformio`
 
 Once installed
-`pio run --target upload`
+`pio run` to build
+`pio run --target upload` to upload
+
 
 
 # Documentation

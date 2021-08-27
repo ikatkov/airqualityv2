@@ -19,21 +19,25 @@ U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, U8X8_PIN_NONE);
 SoftwareSerial pmsSerial(PMS5003_RX_PIN, PMS5003_TX_PIN);
 Adafruit_NeoPixel pixel = Adafruit_NeoPixel(1, NEO_PIN, NEO_GRB + NEO_KHZ800);
 
-
 Adafruit_BME280 bme; // I2C
 MQ135Indian gasSensor = MQ135Indian(A0);
 
 pms5003data newSensorData = pms5003data();
+CircularBuffer co2Buffer;
 CircularBuffer aqiBuffer;
 CircularBuffer tempBuffer;
 CircularBuffer humidityBuffer;
+bool displayCO2;
 
-void setup() {
+void setup()
+{
     Serial.begin(9600);
-    while (!Serial) delay(10);
+    while (!Serial)
+        delay(10);
 
     //BME280 initialization
-    while(!bme.begin(0x76))    {
+    while (!bme.begin(0x76))
+    {
         Serial.println("Could not find BME280 sensor!");
         delay(1000);
     }
@@ -43,6 +47,7 @@ void setup() {
     Serial.println(F("PMS5003 Air Quality Sensor"));
 
     u8g2.begin();
+    u8g2.enableUTF8Print();
 
     // Initializes the NeoPixel library.
     pixel.begin();
@@ -54,12 +59,15 @@ void setup() {
     delay(1000);
 }
 
-void displayData(bool refreshSign) {
+void displayData(bool refreshSign, bool co2)
+{
+    uint16_t averageCO2 = round(co2Buffer.getAverage());
     uint16_t averageAQI = round(aqiBuffer.getAverage());
     uint16_t averageTemp = round(tempBuffer.getAverage());
     uint16_t averageHumidity = round(humidityBuffer.getAverage());
     u8g2.firstPage();
-    do {
+    do
+    {
         //top line
         u8g2.setFont(u8g2_font_6x12_mr);
         u8g2.setCursor(0, 10);
@@ -75,7 +83,8 @@ void displayData(bool refreshSign) {
         u8g2.print(F("10.0"));
 
         //refreshSign
-        if(refreshSign) {
+        if (refreshSign)
+        {
             u8g2.setFont(u8g2_font_open_iconic_arrow_1x_t);
             u8g2.drawGlyph(120, 16, 87);
         }
@@ -89,33 +98,54 @@ void displayData(bool refreshSign) {
         u8g2.print(averageHumidity);
         u8g2.print(F("%"));
 
-        //--AQI
-        u8g2.setFont(u8g2_font_logisoso46_tn);
-        int width = u8g2.getUTF8Width(String(averageAQI).c_str());
-        u8g2.setCursor(45-width/2,63);
-        u8g2.print(averageAQI);
-        u8g2.setFont(u8g2_font_6x12_mr);
-        u8g2.setCursor(0,63);
-        u8g2.print("AQI");
-    } while ( u8g2.nextPage());
+        if (!displayCO2)
+        {
+            //--AQI
+            u8g2.setFont(u8g2_font_logisoso46_tn);
+            int width = u8g2.getUTF8Width(String(averageAQI).c_str());
+            u8g2.setCursor(45 - width / 2, 63);
+            u8g2.print(averageAQI);
+            u8g2.setFont(u8g2_font_6x12_mr);
+            u8g2.setCursor(0, 63);
+            u8g2.print("AQI");
+        }
+        else
+        {
+            //--CO2
+            u8g2.setFont(u8g2_font_logisoso46_tn);
+            int width = u8g2.getUTF8Width(String(averageCO2).c_str());
+            if(width > 100){
+                u8g2.setFont(u8g2_font_logisoso34_tn);
+                width = u8g2.getUTF8Width(String(averageCO2).c_str());
+            }
+            u8g2.setCursor(45 - width / 2, 63);
+            u8g2.print(averageCO2);
+            u8g2.setFont(u8g2_font_6x12_mr);
+            u8g2.setCursor(0, 63);
+            u8g2.print("CO2");
+        }
+    } while (u8g2.nextPage());
 }
 
-
-boolean readPMSData(Stream *s, pms5003data *data) {
-    if (!s->available()) {
-       // Serial.println(F("Stream not available"));
+boolean readPMSData(Stream *s, pms5003data *data)
+{
+    if (!s->available())
+    {
+        // Serial.println(F("Stream not available"));
         return false;
     }
 
     // Read a byte at a time until we get to the special '0x42' start-byte
-    while (s->peek() != 0x42) {
+    while (s->peek() != 0x42)
+    {
         s->read();
-       // Serial.println(F("byte is not 0x42"));
+        // Serial.println(F("byte is not 0x42"));
     }
 
     // Now read all 32 bytes
-    if (s->available() < 32) {
-       // Serial.println(F("less than 32 bytes available"));
+    if (s->available() < 32)
+    {
+        // Serial.println(F("less than 32 bytes available"));
         return false;
     }
 
@@ -126,11 +156,12 @@ boolean readPMSData(Stream *s, pms5003data *data) {
     //Serial.println(F("Read all 32 bytes to buffer"));
 
     // get checksum ready
-    for (uint8_t i = 0; i < 30; i++) {
+    for (uint8_t i = 0; i < 30; i++)
+    {
         sum += buffer[i];
     }
 
-/*
+    /*
 // debugging
     Serial.print(F("Checksum is "));
     Serial.println(sum, HEX);
@@ -145,43 +176,46 @@ boolean readPMSData(Stream *s, pms5003data *data) {
 
     // The data comes in endian'd, this solves it so it works on all platforms
     uint16_t buffer_u16[15];
-    for (uint8_t i = 0; i < 15; i++) {
+    for (uint8_t i = 0; i < 15; i++)
+    {
         buffer_u16[i] = buffer[2 + i * 2 + 1];
         buffer_u16[i] += (buffer[2 + i * 2] << 8);
     }
 
     // put it into a nice struct :)
-    memcpy((void *) data, (void *) buffer_u16, 30);
+    memcpy((void *)data, (void *)buffer_u16, 30);
 
-    if (sum != data->checksum) {
-/*        Serial.print(F("Checksum failure: "));
+    if (sum != data->checksum)
+    {
+        /*        Serial.print(F("Checksum failure: "));
         Serial.print(sum, HEX);
         Serial.print(F("!="));
         Serial.println(data.checksum, HEX);*/
         return false;
-    } else {
+    }
+    else
+    {
         //Serial.println(F("All good"));
     }
     // success!
     return true;
 }
 
-void loop() {
-    displayData(true);
-
+void loop()
+{
+    displayCO2 = !displayCO2;
+    displayData(true, displayCO2);
 
     float temperature = bme.readTemperature();
-  //  float pressure = bme.readPressure()/100.0F;
+    //  float pressure = bme.readPressure()/100.0F;
     float humidity = bme.readHumidity();
     float ppm = gasSensor.getCorrectedPPM(temperature, humidity);
+    co2Buffer.add(ppm);
 
-    //empirical corrections
-    //temperature -=1.5;
-    //humidity +=2;
-    if(humidity > 0 && humidity <= 100)
-      humidityBuffer.add(humidity);
-    if(temperature >= -40 && temperature <= 80)
-     tempBuffer.add(temperature);
+    if (humidity > 0 && humidity <= 100)
+        humidityBuffer.add(humidity);
+    if (temperature >= -40 && temperature <= 80)
+        tempBuffer.add(temperature);
 
     Serial.print(F("Humidity "));
     Serial.print(humidity);
@@ -194,27 +228,25 @@ void loop() {
     Serial.print(ppm);
     Serial.println(tempBuffer.getAverage(), 1);
 
-
-    if (readPMSData(&pmsSerial, &newSensorData)) {
+    if (readPMSData(&pmsSerial, &newSensorData))
+    {
         uint16_t currentAqi = AQICalculator::getAqi(newSensorData.pm25_standard, newSensorData.pm100_standard, humidityBuffer.getAverage());
         Serial.println(currentAqi);
         aqiBuffer.add(currentAqi);
 
-        displayData(false);
+        displayData(false, displayCO2);
 
-        uint8_t red = pgm_read_byte(&aiq_colors[currentAqi*3]);
-        uint8_t green = pgm_read_byte(&aiq_colors[currentAqi*3+1]);
-        uint8_t blue = pgm_read_byte(&aiq_colors[currentAqi*3+2]);
-        pixel.setPixelColor(0, red, green, blue );
+        uint8_t red = pgm_read_byte(&aiq_colors[currentAqi * 3]);
+        uint8_t green = pgm_read_byte(&aiq_colors[currentAqi * 3 + 1]);
+        uint8_t blue = pgm_read_byte(&aiq_colors[currentAqi * 3 + 2]);
+        pixel.setPixelColor(0, red, green, blue);
         pixel.show();
 
-
         delay(4000);
-    } else {
-        Serial.println(F("Failure"));
-        delay(1000);  // try again in a bit!
     }
-
+    else
+    {
+        Serial.println(F("Failure"));
+        delay(1000); // try again in a bit!
+    }
 }
-
-

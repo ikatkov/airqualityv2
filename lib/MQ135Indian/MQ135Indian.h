@@ -1,3 +1,5 @@
+ // see https://www.researchgate.net/publication/328875972_Influence_of_Temperature_and_Humidity_on_the_Output_Resistance_Ratio_of_the_MQ-135_Sensor
+ 
  #include "Arduino.h"
 
 /// The load resistance on the board

@@ -6,6 +6,15 @@
 <img src="./sensor.jpg" width="300"> 
 <img src="./case.jpg" width="300"> 
 
+# Build
+
+Install PlatformIO (or CLI only) - https://docs.platformio.org/en/latest/core/index.html
+`brew install platformio`
+
+Once installed
+`pio run --target upload`
+
+
 # Documentation
 
 [PMS5003 particulate sensor pin-out and protocol]( 
